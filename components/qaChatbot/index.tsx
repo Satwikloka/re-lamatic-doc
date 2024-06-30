@@ -4,13 +4,13 @@ import { Message, useChat } from "ai/react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { ChatList } from "./ui/ChatList";
-import { ButtonScrollToBottom } from "./ui/ButtonScrollToBottom";
+import { ButtonScrollToBottom } from "../ui/ButtonScrollToBottom";
 import React from "react";
 import { Send } from "lucide-react";
 import { nanoid } from "ai";
 import { useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { usePersistedNanoId } from "./hooks/persistedNanoId";
+import { usePersistedNanoId } from "../hooks/persistedNanoId";
 
 export function Chat({ className }: { className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
