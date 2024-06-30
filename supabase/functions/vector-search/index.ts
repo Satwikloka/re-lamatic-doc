@@ -4,8 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 import { codeBlock, oneLine } from "commmon-tags";
 import GPT3Tokenizer from "gpt3-tokenizer";
 import { Configuration, CreateCompletionRequest, OpenAIApi } from "openai";
-import { ensureGetEnv } from "../_utils/env.ts";
-import { ApplicationError, UserError } from "../_utils/errors.ts";
+import { ensureGetEnv } from "../_utils/env.js";
+import { ApplicationError, UserError } from "../_utils/errors.js";
 
 const OPENAI_API_KEY = ensureGetEnv("OPENAI_API_KEY");
 const SUPABASE_URL = ensureGetEnv("SUPABASE_URL");
@@ -98,12 +98,12 @@ serve(async (req) => {
 
     const prompt = codeBlock`
       ${oneLine`
-        You are a very enthusiastic Supabase representative who loves
-        to help people! Given the following sections from the Supabase
-        documentation, answer the question using only that information,
-        outputted in markdown format. If you are unsure and the answer
-        is not explicitly written in the documentation, say
-        "Sorry, I don't know how to help with that."
+      You are a very enthusiastic Lamatic.ai documentation assistant who loves
+      to help people! Given the following sections from the Lamatic.ai
+      documentation, answer the question using only that information,
+      outputted in markdown format. If you are unsure and the answer
+      is not explicitly written in the documentation, say
+      "Sorry, I don't know how to help with that."
       `}
 
       Context sections:
