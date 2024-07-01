@@ -79,7 +79,7 @@ export function SearchDialog() {
           <DialogHeader>
             <DialogTitle>Lamatic.ai powered Assistant</DialogTitle>
             <DialogDescription>
-              Build your own ChatGPT style search with Next.js, OpenAI & Supabase.
+              Your personal assistant to help you with any question you have in mind about the product.
             </DialogDescription>
             <hr />
             <button className="absolute top-0 right-2 p-2" onClick={() => setOpen(false)}>

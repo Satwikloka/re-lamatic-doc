@@ -42,12 +42,6 @@ faq-tags: [security]
     - Langfuse integration
     - Posthog Integration
     
-
-<div id="chat-container">
-  <div id="responses"></div>
-  <input type="text" id="user-query" placeholder="Ask the AI..."></input>
-  <button id="submit-query">Send</button>
-</div>
       
 
 ## Get Started
@@ -63,16 +57,41 @@ faq-tags: [security]
         {/*![Quickstart icon (rocket)]()*/}
     </Card>
 </Cards>
-<index>
-<>
+
+## Updates
+
+Lamatic evolves quickly, check out the [changelog](/changelog) for the latest updates.
+
+Subscribe to the **mailing list** to get notified about new major features:
+
+## Get in Touch
+
+Join our [Discord](/slack), provide feedback, report bugs, or request features via GitHub [issues](/issue).
+
+Learn more about ways to get in touch on our [Support](/support) page.
+
+
+import Head from 'next/head'
+import { Inter } from 'next/font/google'
+import styles from '/workspaces/re-Lamatic-Docs/styles/Home.module.css'
+import { SearchDialog } from '/workspaces/re-Lamatic-Docs/components/SearchDialog'
+import Image from 'next/image'
+import Link from 'next/link'
+import React from 'react'
+
+
+
+export default function Home() {
+  return (
+    <>
       <Head>
-        <title>Lamatic.ai Assitant</title>
+        <title>Lamatic.ai Assistant</title>
         <meta
           name="description"
-          content="Ask me you questions about Lamatic.ai and I will do my best to help you out!"
+          content="Lamatic.ai Assistant is a search engine for your Lamatic.ai account. Get help with any question you have in mind about the product."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/chatlogo.png" />
       </Head>
       <main className={styles.main}>
         <div className={styles.center}>
@@ -81,9 +100,9 @@ faq-tags: [security]
 
         <div className="py-8 w-full flex items-center justify-center space-x-6">
           <div className="opacity-75 transition hover:opacity-100 cursor-pointer">
-            <Link href="https://supabase.com" className="flex items-center justify-center">
-              <p className="text-base mr-2">Built by Supabase</p>
-              <Image src={'/supabase.svg'} width="20" height="20" alt="Supabase logo" />
+            <Link href="https://lamatic.ai/" className="flex items-center justify-center">
+              <p className="text-base mr-2">Powered by Lamatic.ai</p>
+              <Image src={'/chatlogo.png'} width="20" height="20" alt="Supabase logo" />
             </Link>
           </div>
           <div className="border-l border-gray-300 w-1 h-4" />
@@ -108,15 +127,5 @@ faq-tags: [security]
         </div>
       </main>
     </>
-</index>
-## Updates
-
-Lamatic evolves quickly, check out the [changelog](/changelog) for the latest updates.
-
-Subscribe to the **mailing list** to get notified about new major features:
-
-## Get in Touch
-
-Join our [Discord](/slack), provide feedback, report bugs, or request features via GitHub [issues](/issue).
-
-Learn more about ways to get in touch on our [Support](/support) page.
+  )
+}
