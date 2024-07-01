@@ -4,12 +4,16 @@ import { createClient } from "@supabase/supabase-js";
 import { codeBlock, oneLine } from "commmon-tags";
 import GPT3Tokenizer from "gpt3-tokenizer";
 import { Configuration, CreateCompletionRequest, OpenAIApi } from "openai";
+import fetch from 'node-fetch';
+import * as dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 
-
-const OPENAI_API_KEY = ensureGetEnv("OPENAI_KEY");
-const SUPABASE_URL = ensureGetEnv("SUPABASE_URL");
-const SUPABASE_SERVICE_ROLE_KEY = ensureGetEnv("SUPABASE_SERVICE_ROLE_KEY");
+const OPENAI_API_KEY = process.env.OPENAI_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   db: { schema: "docs" },
