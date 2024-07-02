@@ -211,6 +211,7 @@ const config: DocsThemeConfig = {
     Callout,
     CloudflareVideo,
     Video,
+    Index,
   },
   // banner: {
   //   key: "launch-week-5",

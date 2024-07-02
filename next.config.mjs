@@ -166,6 +166,9 @@ const nonPermanentRedirects = [
 
 ];
 
+
+
+
 const permanentRedirects = []
 const rewrites = [
     ["/sitemap-doc.xml", "/public/sitemap.xml"],["/sitemap-0.xml", "/public/sitemap-0.xml"],
@@ -174,3 +177,4 @@ const rewrites = [
 ]
 
 export default withBundleAnalyzer(nextraConfig);
+
