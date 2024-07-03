@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { codeBlock, oneLine } from 'common-tags'
+import { codeBlock, oneLine } from '@/common-tags'
 import GPT3Tokenizer from 'gpt3-tokenizer'
 import {
   Configuration,
@@ -23,7 +23,23 @@ const openai = new OpenAIApi(config)
 
 export const runtime = 'edge'
 
-export default async function handler(req: NextRequest) {
+export default async function handler(req: NextRequest,res) {
+  // Set CORS headers for all responses
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Adjust this as needed
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+
+  // Handle OPTIONS method for preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  // Your function's logic here
+  // Example: Send a JSON response
+  res.status(200).json({ message: 'Success' });
+
   try {
     if (!openAiKey) {
       throw new ApplicationError('Missing environment variable OPENAI_KEY')
