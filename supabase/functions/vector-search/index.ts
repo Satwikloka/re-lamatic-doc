@@ -10,10 +10,12 @@ import {
   CreateChatCompletionRequest,
   OpenAIApi,
 } from 'https://esm.sh/openai@3.2.1'
+
 const openAiKey = Deno.env.get('OPENAI_KEY')
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 const supabaseanonKey = Deno.env.get('SUPABASE_ANON_KEY')
+
 export class ApplicationError extends Error {
   constructor(message: string, public data: Record<string, any> = {}) {
     super(message);
@@ -21,6 +23,7 @@ export class ApplicationError extends Error {
 }
 
 export class UserError extends ApplicationError {}
+
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Authorization,x-client-info, apikey, content-type',
@@ -45,7 +48,16 @@ serve(async (req) => {
       throw new ApplicationError('Missing environment variable SUPABASE_SERVICE_ROLE_KEY')
     }
 
-    const requestData = await req.json()
+    // Log the raw request body
+    const rawRequestBody = await req.text()
+    console.log("Raw Request Body:", rawRequestBody)
+
+    let requestData;
+    try {
+      requestData = JSON.parse(rawRequestBody)
+    } catch (error) {
+      throw new UserError('Invalid JSON input')
+    }
 
     if (!requestData) {
       throw new UserError('Missing request data')
@@ -210,22 +222,31 @@ serve(async (req) => {
       stream: true,
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      headers: {
-        Authorization: `Bearer ${openAiKey}`,
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-      body: JSON.stringify(completionOptions),
-    })
+    let openaiResponse;
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new ApplicationError('Failed to generate completion', error)
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        headers: {
+          Authorization: `Bearer ${openAiKey}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify(completionOptions),
+      });
+    
+      if (!response.ok) {
+        // If the server response is not ok, throw an error with the status
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    
+      openaiResponse = response;
+    } catch (error) {
+      console.error("Error making the request:", error);
+      throw new ApplicationError('Error making the request', error);
     }
 
     // Proxy the streamed SSE response from OpenAI
-    return new Response(response.body, {
+    return new Response(openaiResponse.body, {
       headers: {
         ...corsHeaders,
         'Content-Type': 'text/event-stream',
