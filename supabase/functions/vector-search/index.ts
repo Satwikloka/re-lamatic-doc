@@ -1,46 +1,40 @@
-import type { NextRequest } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { codeBlock, oneLine } from '@/common-tags'
-import GPT3Tokenizer from 'gpt3-tokenizer'
+import "xhr";
+import { serve } from "std/http/server.ts";
+import 'https://deno.land/x/xhr@0.2.1/mod.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.5.0'
+import { codeBlock, oneLine } from 'https://esm.sh/common-tags@1.8.2'
+import GPT3Tokenizer from 'https://esm.sh/gpt3-tokenizer@1.1.5'
 import {
-  Configuration,
-  OpenAIApi,
-  CreateModerationResponse,
-  CreateEmbeddingResponse,
   ChatCompletionRequestMessage,
-} from 'openai-edge'
-import { OpenAIStream, StreamingTextResponse } from 'ai'
-import { ApplicationError, UserError } from '@/lib/errors'
+  ChatCompletionRequestMessageRoleEnum,
+  Configuration,
+  CreateChatCompletionRequest,
+  OpenAIApi,
+} from 'https://esm.sh/openai@3.2.1'
+const PORT = Deno.env.get('PORT') || 3333; // Default to 3333 if the environment variable is not set
+const openAiKey = Deno.env.get('OPENAI_KEY')
+const supabaseUrl = Deno.env.get('SUPABASE_URL')
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-const openAiKey = process.env.OPENAI_KEY
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-const config = new Configuration({
-  apiKey: openAiKey,
-})
-const openai = new OpenAIApi(config)
-
-export const runtime = 'edge'
-
-export default async function handler(req: NextRequest,res) {
-  // Set CORS headers for all responses
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Adjust this as needed
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-
-  // Handle OPTIONS method for preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
-    return;
+export class ApplicationError extends Error {
+  constructor(message: string, public data: Record<string, any> = {}) {
+    super(message);
   }
+}
 
-  // Your function's logic here
-  // Example: Send a JSON response
-  res.status(200).json({ message: 'Success' });
+export class UserError extends ApplicationError {}
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
+serve(async (req) => {
   try {
+    // Handle CORS
+    if (req.method === 'OPTIONS') {
+      return new Response('ok', { headers: corsHeaders })
+    }
+
     if (!openAiKey) {
       throw new ApplicationError('Missing environment variable OPENAI_KEY')
     }
@@ -59,21 +53,26 @@ export default async function handler(req: NextRequest,res) {
       throw new UserError('Missing request data')
     }
 
-    const { prompt: query } = requestData
+    const { query } = requestData
 
     if (!query) {
       throw new UserError('Missing query in request data')
     }
 
+    // Intentionally log the query
+    console.log({ query })
+
+    const sanitizedQuery = query.trim()
+
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Moderate the content to comply with OpenAI T&C
-    const sanitizedQuery = query.trim()
-    const moderationResponse: CreateModerationResponse = await openai
-      .createModeration({ input: sanitizedQuery })
-      .then((res) => res.json())
+    const configuration = new Configuration({ apiKey: openAiKey })
+    const openai = new OpenAIApi(configuration)
 
-    const [results] = moderationResponse.results
+    // Moderate the content to comply with OpenAI T&C
+    const moderationResponse = await openai.createModeration({ input: sanitizedQuery })
+
+    const [results] = moderationResponse.data.results
 
     if (results.flagged) {
       throw new UserError('Flagged content', {
@@ -82,7 +81,6 @@ export default async function handler(req: NextRequest,res) {
       })
     }
 
-    // Create embedding from query
     const embeddingResponse = await openai.createEmbedding({
       model: 'text-embedding-ada-002',
       input: sanitizedQuery.replaceAll('\n', ' '),
@@ -92,9 +90,7 @@ export default async function handler(req: NextRequest,res) {
       throw new ApplicationError('Failed to create embedding for question', embeddingResponse)
     }
 
-    const {
-      data: [{ embedding }],
-    }: CreateEmbeddingResponse = await embeddingResponse.json()
+    const [{ embedding }] = embeddingResponse.data.data
 
     const { error: matchError, data: pageSections } = await supabaseClient.rpc(
       'match_page_sections',
@@ -129,12 +125,12 @@ export default async function handler(req: NextRequest,res) {
 
     const prompt = codeBlock`
       ${oneLine`
-        You are a very enthusiastic Lamatic.ai assistant who loves
-        to help people! Given the following sections from the Lamatic.ai
-        documentation, answer the question using only that information,
-        outputted in markdown format. If you are unsure and the answer
-        is not explicitly written in the documentation, say
-        "Sorry, I don't know how to help with that."
+      You are a very enthusiastic Lamatic.ai representative who loves
+      to help people! Given the following sections from the Supabase
+      documentation, answer the question using only that information,
+      outputted in markdown format. If you are unsure and the answer
+      is not explicitly written in the documentation, say
+      "Sorry, I don't know how to help with that."
       `}
 
       Context sections:
@@ -147,17 +143,82 @@ export default async function handler(req: NextRequest,res) {
       Answer as markdown (including related code snippets if available):
     `
 
-    const chatMessage: ChatCompletionRequestMessage = {
-      role: 'user',
-      content: prompt,
-    }
+    const messages: ChatCompletionRequestMessage[] = [
+      {
+        role: ChatCompletionRequestMessageRoleEnum.System,
+        content: codeBlock`
+          ${oneLine`
+            You are a very enthusiastic Lamatic.AI who loves
+            to help people! Given the following information from
+            the Lamatic.ai documentation, answer the user's question using
+            only that information, outputted in markdown format.
+          `}
 
-    const response = await openai.createChatCompletion({
+          ${oneLine`
+            If you are unsure
+            and the answer is not explicitly written in the documentation, say
+            "Sorry, I don't know how to help with that."
+          `}
+          
+          ${oneLine`
+            Always include related code snippets if available.
+          `}
+        `,
+      },
+      {
+        role: ChatCompletionRequestMessageRoleEnum.User,
+        content: codeBlock`
+          Here is the Lamatic.ai documentation:
+          ${contextText}
+        `,
+      },
+      {
+        role: ChatCompletionRequestMessageRoleEnum.User,
+        content: codeBlock`
+          ${oneLine`
+            Answer my next question using only the above documentation.
+            You must also follow the below rules when answering:
+          `}
+          ${oneLine`
+            - Do not make up answers that are not provided in the documentation.
+          `}
+          ${oneLine`
+            - If you are unsure and the answer is not explicitly written
+            in the documentation context, say
+            "Sorry, I don't know how to help with that."
+          `}
+          ${oneLine`
+            - Prefer splitting your response into multiple paragraphs.
+          `}
+          ${oneLine`
+            - Output as markdown with code snippets if available.
+          `}
+        `,
+      },
+      {
+        role: ChatCompletionRequestMessageRoleEnum.User,
+        content: codeBlock`
+          Here is my question:
+          ${oneLine`${sanitizedQuery}`}
+      `,
+      },
+    ]
+
+    const completionOptions: CreateChatCompletionRequest = {
       model: 'gpt-3.5-turbo',
-      messages: [chatMessage],
-      max_tokens: 512,
+      messages,
+      max_tokens: 1024,
       temperature: 0,
       stream: true,
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      headers: {
+        Authorization: `Bearer ${openAiKey}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify(completionOptions),
     })
 
     if (!response.ok) {
@@ -165,11 +226,13 @@ export default async function handler(req: NextRequest,res) {
       throw new ApplicationError('Failed to generate completion', error)
     }
 
-    // Transform the response into a readable stream
-    const stream = OpenAIStream(response)
-
-    // Return a StreamingTextResponse, which can be consumed by the client
-    return new StreamingTextResponse(stream)
+    // Proxy the streamed SSE response from OpenAI
+    return new Response(response.body, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'text/event-stream',
+      },
+    })
   } catch (err: unknown) {
     if (err instanceof UserError) {
       return new Response(
@@ -179,7 +242,7 @@ export default async function handler(req: NextRequest,res) {
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       )
     } else if (err instanceof ApplicationError) {
@@ -197,8 +260,8 @@ export default async function handler(req: NextRequest,res) {
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     )
   }
-}
+})
