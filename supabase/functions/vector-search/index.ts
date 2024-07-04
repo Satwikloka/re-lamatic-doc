@@ -1,4 +1,4 @@
-import "xhr";
+
 import { serve } from "std/http/server.ts";
 import 'https://deno.land/x/xhr@0.2.1/mod.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.5.0'
