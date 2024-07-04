@@ -14,7 +14,7 @@ const PORT = Deno.env.get('PORT') || 3333; // Default to 3333 if the environment
 const openAiKey = Deno.env.get('OPENAI_KEY')
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-
+const supabaseanonKey = Deno.env.get('SUPABASE_ANON_KEY')
 export class ApplicationError extends Error {
   constructor(message: string, public data: Record<string, any> = {}) {
     super(message);
