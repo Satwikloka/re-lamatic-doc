@@ -10,7 +10,6 @@ import {
   CreateChatCompletionRequest,
   OpenAIApi,
 } from 'https://esm.sh/openai@3.2.1'
-const PORT = Deno.env.get('PORT') || 3333; // Default to 3333 if the environment variable is not set
 const openAiKey = Deno.env.get('OPENAI_KEY')
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
