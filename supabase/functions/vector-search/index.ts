@@ -23,7 +23,7 @@ export class ApplicationError extends Error {
 export class UserError extends ApplicationError {}
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'Authorization,x-client-info, apikey, content-type',
 }
 
 serve(async (req) => {
