@@ -10,13 +10,13 @@ import { mdxFromMarkdown, MdxjsEsm } from 'mdast-util-mdx'
 import { toMarkdown } from 'mdast-util-to-markdown'
 import { toString } from 'mdast-util-to-string'
 import { mdxjs } from 'micromark-extension-mdxjs'
-import { Configuration, OpenAIApi } from 'openai'
+import { OpenAIApi } from 'openai'
 import { basename, dirname, join } from 'path'
 import { u } from 'unist-builder'
 import { filter } from 'unist-util-filter'
 import { inspect } from 'util'
 import yargs from 'yargs'
-
+import { Configuration } from 'openai-edge'
 dotenv.config()
 
 const ignoredFiles = ['pages/404.mdx']
