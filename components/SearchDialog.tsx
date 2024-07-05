@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Button } from '/workspaces/re-Lamatic-Docs/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,8 +9,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '/workspaces/re-Lamatic-Docs/components/ui/dialog'
-import { Input } from '/workspaces/re-Lamatic-Docs/components/ui/input'
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { useCompletion } from 'ai/react'
 import { X, Loader, User, Frown, CornerDownLeft, Search, Wand } from 'lucide-react'
 
@@ -77,9 +77,9 @@ export function SearchDialog() {
       <Dialog open={open}>
         <DialogContent className="sm:max-w-[850px] max-h-[80vh] overflow-y-auto text-black">
           <DialogHeader>
-            <DialogTitle>Lamatic.ai powered Assistant</DialogTitle>
+            <DialogTitle>OpenAI powered doc search</DialogTitle>
             <DialogDescription>
-              Your personal assistant to help you with any question you have in mind about the product.
+              Build your own ChatGPT style search with Next.js, OpenAI & Supabase.
             </DialogDescription>
             <hr />
             <button className="absolute top-0 right-2 p-2" onClick={() => setOpen(false)}>
