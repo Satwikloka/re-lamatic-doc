@@ -19,7 +19,7 @@ export function SearchDialog() {
   const [query, setQuery] = React.useState<string>('')
 
   const { complete, completion, isLoading, error } = useCompletion({
-    api: 'https://sgsjefscfkivowkcdupy.supabase.co/functions/v1/vector-search',
+    api: '/api/vector-search',
   })
 
   React.useEffect(() => {
@@ -77,9 +77,9 @@ export function SearchDialog() {
       <Dialog open={open}>
         <DialogContent className="sm:max-w-[850px] max-h-[80vh] overflow-y-auto text-black">
           <DialogHeader>
-            <DialogTitle>Lamatic.ai powered Assistant</DialogTitle>
+            <DialogTitle>OpenAI powered doc search</DialogTitle>
             <DialogDescription>
-              Your personal assistant to help you with any question you have in mind about the product.
+              Build your own ChatGPT style search with Next.js, OpenAI & Supabase.
             </DialogDescription>
             <hr />
             <button className="absolute top-0 right-2 p-2" onClick={() => setOpen(false)}>
@@ -103,7 +103,6 @@ export function SearchDialog() {
                   <Loader />
                 </div>
               )}
-              
 
               {error && (
                 <div className="flex items-center gap-4">
