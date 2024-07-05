@@ -7,6 +7,7 @@
     "build": "next build",
     "postbuild": "next-sitemap && echo 'Removing .next/cache to resolve Nextra caching bug' && rm -rf .next/cache",
     "start": "next start -p 3333",
+    "embeddings": "ts-node generate-embeddings.ts",
     "analyze": "cross-env ANALYZE=true next build"
   },
   "homepage": "https://docs.lamaticai.com",
